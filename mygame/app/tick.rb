@@ -10,6 +10,9 @@ private
   def initial_setup
     @game_in_progress ||= false
     @wait_counter ||= 0
+    @treasures ||= 0
+    @inventory_lights ||= 0
+    @inventory_axes ||= 0  
   end
 
   def welcome_screen
@@ -46,7 +49,22 @@ private
   end
 
   def play_game
-    @args.outputs.labels  << [640, 500, 'Map area', 5, 1]
-    @args.outputs.labels  << [640, 460, 'Status area', 5, 1]
-    @args.outputs.labels  << [640, 420, 'Quit', 5, 1]
+    draw_status_area
+    draw_map_area
+    @game_in_progress = false if @args.inputs.keyboard.key_down.escape
+  end
+
+  def draw_status_area
+    # Status area is 360 wide by 720 high
+    @args.outputs.solids << { x: 0, y: 0, w: 360, h: 720, r: 200, g: 200 }
+    @args.outputs.labels  << {x: 180, y: 700, text: "Current score: #{@treasures}", size_enum: 5, alignment_enum: 1}
+    @args.outputs.labels  << {x: 180, y: 400, text: "Inventory", size_enum: 5, alignment_enum: 1}
+    @args.outputs.labels  << {x: 180, y: 350, text: "Lights: #{@inventory_lights}", size_enum: 3, alignment_enum: 1}
+    @args.outputs.labels  << {x: 180, y: 310, text: "Pickaxes: #{@inventory_axes}", size_enum: 3, alignment_enum: 1}
+    @args.outputs.labels  << {x: 180, y: 50, text: 'Hit escape to quit', size_enum: 5, alignment_enum: 1}
+  end
+
+  def draw_map_area
+    # Map area is 920 wide by 720 high, with left at position 360
+    @args.outputs.labels  << {x: 360 + 920/2, y: 500, text: 'Map area', size_enum: 5, alignment_enum: 1}
   end
