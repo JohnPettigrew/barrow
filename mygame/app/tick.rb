@@ -1,3 +1,7 @@
+SPRITE_PATHS = {
+  player: 'mygame/sprites/circle/gray.png'
+}.freeze
+
 def tick args
   initial_setup
   @args = args
@@ -49,22 +53,36 @@ private
   end
 
   def play_game
+    @map = Map.new
     draw_status_area
     draw_map_area
     @game_in_progress = false if @args.inputs.keyboard.key_down.escape
   end
 
   def draw_status_area
-    # Status area is 360 wide by 720 high
-    @args.outputs.solids << { x: 0, y: 0, w: 360, h: 720, r: 200, g: 200 }
-    @args.outputs.labels  << {x: 180, y: 700, text: "Current score: #{@treasures}", size_enum: 5, alignment_enum: 1}
-    @args.outputs.labels  << {x: 180, y: 400, text: "Inventory", size_enum: 5, alignment_enum: 1}
-    @args.outputs.labels  << {x: 180, y: 350, text: "Lights: #{@inventory_lights}", size_enum: 3, alignment_enum: 1}
-    @args.outputs.labels  << {x: 180, y: 310, text: "Pickaxes: #{@inventory_axes}", size_enum: 3, alignment_enum: 1}
-    @args.outputs.labels  << {x: 180, y: 50, text: 'Hit escape to quit', size_enum: 5, alignment_enum: 1}
+    # Status area is 560 wide by 720 high
+    width = 560
+    height = 720
+    @args.outputs.solids << { x: 0, y: 0, w: width, h: height, r: 200, g: 200 }
+    @args.outputs.labels  << {x: width/2, y: height - 20, text: "Current score: #{@treasures}", size_enum: 5, alignment_enum: 1}
+    @args.outputs.labels  << {x: width/2, y: height/2 + 50, text: "Inventory", size_enum: 5, alignment_enum: 1}
+    @args.outputs.labels  << {x: width/2, y: height/2, text: "Lights: #{@inventory_lights}", size_enum: 3, alignment_enum: 1}
+    @args.outputs.labels  << {x: width/2, y: height/2 - 40, text: "Pickaxes: #{@inventory_axes}", size_enum: 3, alignment_enum: 1}
+    @args.outputs.labels  << {x: width/2, y: 50, text: 'Hit escape to quit', size_enum: 5, alignment_enum: 1}
   end
 
   def draw_map_area
-    # Map area is 920 wide by 720 high, with left at position 360
-    @args.outputs.labels  << {x: 360 + 920/2, y: 500, text: 'Map area', size_enum: 5, alignment_enum: 1}
+    # Map area is 720 wide by 720 high, with left at position 560
+    # Location size is 72x72
+    left = 560
+    height = width = 720
+    location_size = 60
+    @args.outputs.sprites << { x: left + width/2 - location_size/2, y: height/2 - location_size/2, w: location_size, h: location_size, path: SPRITE_PATHS[:player] }  
+    current_area = @map.current_area(player_vertical_offset: 0, player_horizontal_offset: 0)
+    current_area.each_with_index do |row, vertical_offset|
+      row.each_with_index do |cell, horizontal_offset|
+        cell_shade = cell.background? ? 50 : 250
+        @args.outputs.solids << { x: left + location_size * horizontal_offset, y: location_size * (10-vertical_offset), w: location_size, h: location_size, r: cell_shade, g: cell_shade, b: cell_shade }
+      end
+    end
   end
