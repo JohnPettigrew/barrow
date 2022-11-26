@@ -22,6 +22,10 @@ class Menu
     @entries.each_with_index { |entry, i| args.outputs.labels << { x: 640, y: top - i * 40, text: entry.value, size_enum: 5, alignment_enum: 1, a: entry.selected ? 255 : 120 } }
   end
 
+  def selected_entry
+    @entries.find { |entry| entry.selected }.value
+  end
+
   private
 
   class Entry
