@@ -7,9 +7,9 @@ class Map
 
   def current_area(player_vertical_offset: 0, player_horizontal_offset: 0)
     screen_area = []
-    (0 ... 10).to_a.each do |row|
+    10.times do |row|
       screen_area[row] = []
-      (0 ... 10).to_a.each do |column|
+      10.times do |column|
         screen_area[row][column] = @tile["row_#{row}".to_sym]["column_#{column}".to_sym]
       end
     end
@@ -42,9 +42,9 @@ end
       #   row_2: {column_0: 0, column_1: 1, column_2: 0}
       # }
       tile = {}
-      (0 ... @tile_height).to_a.each do |row|
+      @tile_height.times do |row|
         tile["row_#{row}".to_sym] = {}
-        (0 ... @tile_width).to_a.each do |column|
+        @tile_width.times do |column|
           tile["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(location_value: definition[row][column])
         end
       end
