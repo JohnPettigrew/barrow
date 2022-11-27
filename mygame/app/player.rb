@@ -17,12 +17,12 @@ class Player
   end
 
   def move_up
-    @current_row += 1
+    @current_row -= 1
     10
   end
 
   def move_down
-    @current_row -= 1 unless @current_row.zero?
+    @current_row += 1 unless @current_row.zero?
     10
   end
 
