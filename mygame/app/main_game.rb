@@ -65,7 +65,7 @@ class MainGame
     def initialise_new_game
       half_map_size = @screen_height / 2
       @player = Player.new(x: @status_area_width + half_map_size, y: half_map_size, location_size: @map_location_size, path: SPRITE_PATHS[:player], angle: 90)
-      @map = Map.new(left: @status_area_width, map_location_size: @map_location_size, map_area_width: half_map_size * 2, player: @player)
+      @map = Map.new(map_area_width: half_map_size * 2, player: @player)
       @treasures = @inventory_lights = @inventory_axes = 0
       @game_in_progress = true
     end
@@ -95,10 +95,9 @@ class MainGame
 
     def draw_map_area
       outputs.sprites << @player
-      map = @map
       @map.current_area.each_with_index do |row, r|
         row.each_with_index do |cell, c|
-          cell.set_position(horizontal_offset: c, vertical_offset: r)
+          cell.size(size: 72).set_position(horizontal_offset: @status_area_width + @map_location_size * c, vertical_offset: @map_location_size * (10 - r))
           outputs.solids << cell
         end
       end

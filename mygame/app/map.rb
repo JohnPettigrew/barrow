@@ -13,13 +13,14 @@ class Map
                             [1,1,1,1,1,1,1,1,1,1,1]
                           ].freeze
     
-  def initialize(left:, map_location_size:, map_area_width:, player:)
-    @left = left
-    @map_location_size = map_location_size
+  def initialize(map_area_width:, player:)
     @map_area_width = map_area_width
     @player = player
-    @tile_size = 11
-    @start_tile = create_tile(START_TILE_DEFINITION)
+    @start_tile = Tile.new(definition: START_TILE_DEFINITION, origin_x: 5000, origin_y: 5000)
+    a=@start_tile
+    repl do
+      puts a.definition
+    end
   end
 
   def current_area
@@ -29,56 +30,56 @@ class Map
       screen_area[r] = []
       10.times do |c|
         column = c + @player.current_column
-        screen_area[r][c] = @start_tile["row_#{row}".to_sym]["column_#{column}".to_sym]
+        screen_area[r][c] = @start_tile.definition["row_#{row}".to_sym]["column_#{column}".to_sym]
       end
     end
     screen_area
   end
+end
 
-  private
+class Tile
+  attr_reader :definition
 
-    def create_tile(definition)
-      # The tile is a hash of hashes, and each defines a Location object:
-      # {
-      #   row_5000: {column_5000: <Location...>, column_5001: <Location...>, ...}, 
-      #   row_5001: {column_5000: <Location...>, column_5001: <Location...>, ...},
-      #   row_5002: {column_5000: <Location...>, column_5001: <Location...>, ...}
-      # }
-      tile = {}
-      @tile_size.times do |r|
-        row = r + @player.current_row
-        tile["row_#{row}".to_sym] = {}
-        @tile_size.times do |c|
-          column = c + @player.current_column
-          tile["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(
-            location_value: definition[r][c], 
-            size: @map_location_size, 
-            map_left: @left
-          )
-        end
+  def initialize(definition:, origin_x:, origin_y:)
+    # The tile is a hash of hashes, and each defines a Location object:
+    # {
+    #   row_5000: {column_5000: <Location...>, column_5001: <Location...>, ...}, 
+    #   row_5001: {column_5000: <Location...>, column_5001: <Location...>, ...},
+    #   row_5002: {column_5000: <Location...>, column_5001: <Location...>, ...}
+    # }
+    @tile_size = 11
+    @definition = {}
+    @tile_size.times do |r|
+      row = r + origin_y
+      @definition["row_#{row}".to_sym] = {}
+      @tile_size.times do |c|
+        column = c + origin_x
+        @definition["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(location_value: definition[r][c])
       end
-      tile
     end
+  end
 end
 
 class Location
   attr_sprite
-  attr_reader :type
+  attr_accessor :x
 
-  def initialize(location_value:, map_left:, size:, discoverable: false, light: false, rockfall: false)
+  def initialize(location_value:, discoverable: false, light: false, rockfall: false)
     @background = location_value.zero?
     @light = light || (@type == 2) ? true : false
     @discoverable = discoverable
     @rockfall = rockfall
-    @map_left = map_left
+    @x = @y = @size = 0
+  end
+
+  def size(size:)
     @size = size
-    @x = @map_left
-    @y = 0
+    self
   end
 
   def set_position(horizontal_offset:, vertical_offset:)
-    @x = @map_left + @size * horizontal_offset
-    @y = @size * (10 - vertical_offset)
+    @x = horizontal_offset
+    @y = vertical_offset
   end
 
   def background?
