@@ -7,7 +7,7 @@ class MainGame
   }.freeze
   
   def initialize
-    @game_in_progress = false
+    @start_new_game = @game_in_progress = false
     @wait_counter = -1
     @screen_height = 720
     @screen_width = 1280
@@ -16,7 +16,7 @@ class MainGame
   end
 
   def tick
-    @game_in_progress ? new_game : welcome_screen
+    @start_new_game ? new_game : welcome_screen
   end
 
   private
@@ -47,7 +47,7 @@ class MainGame
     def welcome_menu_action
       case @welcome_menu.selected_entry
       when 'Start game'
-        @game_in_progress = true
+        @start_new_game = true
       when 'High scores'
       when 'Rules'
       else
@@ -56,13 +56,31 @@ class MainGame
     end
 
     def new_game
-      half_map_size = @screen_height / 2
-      @player = Player.new(x: @status_area_width + half_map_size, y: half_map_size, location_size: @map_location_size, path: SPRITE_PATHS[:player], angle: 90)
-      @map = Map.new(left: @status_area_width, map_location_size: @map_location_size)
-      @treasures = @inventory_lights = @inventory_axes = 0
+      initialise_new_game unless @game_in_progress
       draw_status_area
       draw_map_area
-      @game_in_progress = false if inputs.keyboard.key_down.escape
+      handle_game_inputs
+    end
+
+    def initialise_new_game
+      half_map_size = @screen_height / 2
+      @player = Player.new(x: @status_area_width + half_map_size, y: half_map_size, location_size: @map_location_size, path: SPRITE_PATHS[:player], angle: 90)
+      @map = Map.new(left: @status_area_width, map_location_size: @map_location_size, map_area_width: half_map_size * 2, player: @player)
+      @treasures = @inventory_lights = @inventory_axes = 0
+      @game_in_progress = true
+    end
+
+    def handle_game_inputs
+      if @wait_counter.negative?
+        @wait_counter = @player.move_down if inputs.down
+        @wait_counter = @player.move_up if inputs.up
+        @wait_counter = @player.move_left if inputs.left
+        @wait_counter = @player.move_right if inputs.right
+        outputs.labels << {x: 40, y: 40, text: @player.current_row} if inputs.down || inputs.up
+        outputs.labels << {x: 40, y: 40, text: @player.current_column} if inputs.left || inputs.right
+      end
+      @start_new_game = false if inputs.keyboard.key_down.escape
+      @wait_counter -= 1 unless @wait_counter.negative?
     end
 
     def draw_status_area
@@ -77,8 +95,8 @@ class MainGame
 
     def draw_map_area
       outputs.sprites << @player
-      current_area = @map.current_area(player: @player)
-      current_area.each_with_index do |row, r|
+      map = @map
+      @map.current_area.each_with_index do |row, r|
         row.each_with_index do |cell, c|
           cell.set_position(horizontal_offset: c, vertical_offset: r)
           outputs.solids << cell

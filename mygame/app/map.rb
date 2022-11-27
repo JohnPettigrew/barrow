@@ -1,53 +1,60 @@
 class Map
-  def initialize(left:, map_location_size:)
+  START_TILE_DEFINITION = [
+                            [0,0,0,0,0,1,0,0,0,0,0],
+                            [0,0,0,0,0,1,0,0,0,0,0],
+                            [0,0,0,0,0,1,0,0,0,0,0],
+                            [0,0,0,0,0,1,0,0,0,0,0],
+                            [1,1,1,1,1,1,1,1,1,1,1],
+                            [1,1,1,1,1,1,1,1,1,1,1],
+                            [1,2,1,1,1,1,1,1,1,2,1],
+                            [1,1,1,1,1,1,1,1,1,1,1],
+                            [1,1,1,1,1,1,1,1,1,1,1],
+                            [1,1,1,1,1,1,1,1,1,1,1],
+                            [1,1,1,1,1,1,1,1,1,1,1]
+                          ].freeze
+    
+  def initialize(left:, map_location_size:, map_area_width:, player:)
     @left = left
     @map_location_size = map_location_size
-    @tile_width = 11
-    @tile_height = 11
-    @tile = create_tile(define_start_tile)
+    @map_area_width = map_area_width
+    @player = player
+    @tile_size = 11
+    @start_tile = create_tile(START_TILE_DEFINITION)
   end
 
-  def current_area(player:)
+  def current_area
     screen_area = []
-    10.times do |row|
-      screen_area[row] = []
-      10.times do |column|
-        screen_area[row][column] = @tile["row_#{row}".to_sym]["column_#{column}".to_sym]
+    10.times do |r|
+      row = r + @player.current_row
+      screen_area[r] = []
+      10.times do |c|
+        column = c + @player.current_column
+        screen_area[r][c] = @start_tile["row_#{row}".to_sym]["column_#{column}".to_sym]
       end
     end
     screen_area
-end
+  end
 
   private
 
-    def define_start_tile
-      [
-        [0,0,0,0,0,1,0,0,0,0,0],
-        [0,0,0,0,0,1,0,0,0,0,0],
-        [0,0,0,0,0,1,0,0,0,0,0],
-        [0,0,0,0,0,1,0,0,0,0,0],
-        [1,1,1,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1,1,1,1],
-        [1,2,1,1,1,1,1,1,1,2,1],
-        [1,1,1,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1,1,1,1]
-      ]
-    end
-
     def create_tile(definition)
-      # The tile is a hash of hashes:
+      # The tile is a hash of hashes, and each defines a Location object:
       # {
-      #   row_0: {column_0: 0, column_1: 1, column_2: 0}, 
-      #   row_1: {column_0: 0, column_1: 1, column_2: 0},
-      #   row_2: {column_0: 0, column_1: 1, column_2: 0}
+      #   row_5000: {column_5000: <Location...>, column_5001: <Location...>, ...}, 
+      #   row_5001: {column_5000: <Location...>, column_5001: <Location...>, ...},
+      #   row_5002: {column_5000: <Location...>, column_5001: <Location...>, ...}
       # }
       tile = {}
-      @tile_height.times do |row|
+      @tile_size.times do |r|
+        row = r + @player.current_row
         tile["row_#{row}".to_sym] = {}
-        @tile_width.times do |column|
-          tile["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(location_value: definition[row][column], size: @map_location_size, map_left: @left)
+        @tile_size.times do |c|
+          column = c + @player.current_column
+          tile["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(
+            location_value: definition[r][c], 
+            size: @map_location_size, 
+            map_left: @left
+          )
         end
       end
       tile
