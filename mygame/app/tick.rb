@@ -76,8 +76,8 @@ private
     # Location size is 72x72
     left = 560
     height = width = 720
-    location_size = 60
-    @args.outputs.sprites << { x: left + width/2 - location_size/2, y: height/2 - location_size/2, w: location_size, h: location_size, path: SPRITE_PATHS[:player] }  
+    location_size = 72
+    @args.outputs.sprites << { x: left + width/2, y: height/2, w: location_size, h: location_size, path: SPRITE_PATHS[:player] }  
     current_area = @map.current_area(player_vertical_offset: 0, player_horizontal_offset: 0)
     current_area.each_with_index do |row, vertical_offset|
       row.each_with_index do |cell, horizontal_offset|
