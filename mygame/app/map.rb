@@ -18,9 +18,6 @@ class Map
     @player = player
     @start_tile = Tile.new(definition: START_TILE_DEFINITION, origin_x: 5000, origin_y: 5000)
     a=@start_tile
-    repl do
-      puts a.definition
-    end
   end
 
   def current_area
