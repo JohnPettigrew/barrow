@@ -57,7 +57,7 @@ class MainGame
 
     def new_game
       half_map_size = @screen_height / 2
-      @player = Player.new(x: @status_area_width + half_map_size, y: half_map_size, location_size: @map_location_size, path: SPRITE_PATHS[:player])
+      @player = Player.new(x: @status_area_width + half_map_size, y: half_map_size, location_size: @map_location_size, path: SPRITE_PATHS[:player], angle: 90)
       @map = Map.new(left: @status_area_width, map_location_size: @map_location_size)
       @treasures = @inventory_lights = @inventory_axes = 0
       draw_status_area
