@@ -18,7 +18,7 @@ class MainGame
     @map_horizontal_centre = @status_area_width + @map_width / 2
     @map_vertical_centre = @screen_height / 2
     @map_location_size = 72
-    @player = Player.new(x: @map_horizontal_centre, y: @map_vertical_centre, w: @map_location_size - 12, h: @map_location_size - 12, path: SPRITE_PATHS[:player])
+    @player = Player.new(x: @map_horizontal_centre, y: @map_vertical_centre, location_size: @map_location_size, path: SPRITE_PATHS[:player])
   end
 
   def tick
