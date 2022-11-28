@@ -16,7 +16,7 @@ class Map
   def initialize(map_area_width:, player:)
     @map_area_width = map_area_width
     @player = player
-    @start_tile = Tile.new(definition: START_TILE_DEFINITION, origin_x: 5000, origin_y: 5000)
+    @start_tile = create_tile(definition: START_TILE_DEFINITION, origin_x: 5000, origin_y: 5000)
     a=@start_tile
   end
 
@@ -27,17 +27,13 @@ class Map
       screen_area[r] = []
       10.times do |c|
         column = c + @player.current_column
-        screen_area[r][c] = @start_tile.definition["row_#{row}".to_sym]["column_#{column}".to_sym]
+        screen_area[r][c] = @start_tile["row_#{row}".to_sym]["column_#{column}".to_sym]
       end
     end
     screen_area
   end
-end
 
-class Tile
-  attr_reader :definition
-
-  def initialize(definition:, origin_x:, origin_y:)
+  def create_tile(definition:, origin_x:, origin_y:)
     # The tile is a hash of hashes, and each defines a Location object:
     # {
     #   row_5000: {column_5000: <Location...>, column_5001: <Location...>, ...}, 
@@ -45,15 +41,16 @@ class Tile
     #   row_5002: {column_5000: <Location...>, column_5001: <Location...>, ...}
     # }
     @tile_size = 11
-    @definition = {}
+    tile = {}
     @tile_size.times do |r|
       row = r + origin_y
-      @definition["row_#{row}".to_sym] = {}
+      tile["row_#{row}".to_sym] = {}
       @tile_size.times do |c|
         column = c + origin_x
-        @definition["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(location_value: definition[r][c])
+        tile["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(location_value: definition[r][c])
       end
     end
+    tile
   end
 end
 
