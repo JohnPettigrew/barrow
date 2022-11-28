@@ -1,35 +1,46 @@
 class Map
   START_TILE_DEFINITION = [
-                            [0,0,0,0,0,1,0,0,0,0,0],
-                            [0,0,0,0,0,1,0,0,0,0,0],
-                            [0,0,0,0,0,1,0,0,0,0,0],
-                            [0,0,0,0,0,1,0,0,0,0,0],
-                            [1,1,1,1,1,1,1,1,1,1,1],
-                            [1,1,1,1,1,1,1,1,1,1,1],
-                            [1,2,1,1,1,1,1,1,1,2,1],
-                            [1,1,1,1,1,1,1,1,1,1,1],
-                            [1,1,1,1,1,1,1,1,1,1,1],
-                            [1,1,1,1,1,1,1,1,1,1,1],
-                            [1,1,1,1,1,1,1,1,1,1,1]
+                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
+                            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                            [1,1,1,1,2,1,1,1,1,1,2,1,1,1],
+                            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                            [1,1,1,1,1,1,1,1,1,1,1,1,1,1]
                           ].freeze
     
   def initialize(map_area_width:, player:)
     @map_area_width = map_area_width
     @player = player
-    @start_tile = create_tile(definition: START_TILE_DEFINITION, origin_x: 5000, origin_y: 5000)
-    a=@start_tile
+    @tile_size = 7
+    @map_hash = create_tile(
+        definition: START_TILE_DEFINITION, 
+        origin_x: 7000, 
+        origin_y: 0
+      )
   end
 
   def current_area
     screen_area = []
+    # Screen area is 10x10 locations, so the display origin needs to start 5 rows and 5 column earlier
+    origin_x = @player.current_column - 5
+    origin_y = @player.current_row - 5
+    h = @map_hash
     10.times do |r|
-      row = r + @player.current_row
+      row = r + origin_y
       screen_area[r] = []
       10.times do |c|
-        column = c + @player.current_column
-        screen_area[r][c] = @start_tile["row_#{row}".to_sym]["column_#{column}".to_sym]
+        column = c + origin_x
+        screen_area[r][c] = @map_hash["row_#{row}".to_sym]["column_#{column}".to_sym]
       end
-    end
+    end   
     screen_area
   end
 
@@ -40,12 +51,11 @@ class Map
     #   row_5001: {column_5000: <Location...>, column_5001: <Location...>, ...},
     #   row_5002: {column_5000: <Location...>, column_5001: <Location...>, ...}
     # }
-    @tile_size = 11
     tile = {}
-    @tile_size.times do |r|
+    definition.size.times do |r|
       row = r + origin_y
       tile["row_#{row}".to_sym] = {}
-      @tile_size.times do |c|
+      definition.first.size.times do |c|
         column = c + origin_x
         tile["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(location_value: definition[r][c])
       end
