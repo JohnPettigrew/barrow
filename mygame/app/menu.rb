@@ -11,7 +11,7 @@ class Menu
     { entries: @entries.map { |entry| { value: entry.value, selected: entry.selected } } }
   end
 
-  def update_selection(move_up:)
+  def move_up_or_down(move_up:)
     selected_entry_index = @entries.find_index { |entry| entry.selected }
     @entries[selected_entry_index].disable
     incrementer = move_up ? -1 : 1

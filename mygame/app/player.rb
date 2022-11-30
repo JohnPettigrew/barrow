@@ -13,32 +13,28 @@ class Player
     @path = path
     @angle = angle
     # Start row is 5 because the start tile is (currently) 14 rows high and this will put the centre of the viewport at the right place.
-    @current_row = 9
+    @current_row = 5
     # Start column is 7000 so that we have lots of space to wander the barrow, while being an easy multiple of the map tile size of 7.
     @current_column = 7007
   end
 
-  def move_up
-    # Decrement player position and return the required wait time before new input will be processed (to stop extremely rapid movement)
-    [@current_row -= 1, 0].max
-    10
+  def move_up_or_down(move_up:)
+    @current_row = if move_up
+                     # Increment player position
+                     @current_row + 1
+                   else
+                     # Decrement player position to a minimum of 5 so we don't try and generate unneeded negative-value areas in the @map_hash
+                     [@current_row - 1, 5].max
+                   end
   end
 
-  def move_down
-    # Increment player position and return the required wait time before new input will be processed (to stop extremely rapid movement)
-    @current_row += 1
-    10
-  end
-
-  def move_left
-    # Decrement player position and return the required wait time before new input will be processed (to stop extremely rapid movement)
-    [@current_column -= 1, 0].max
-    10
-  end
-
-  def move_right
-    # Increment player position and return the required wait time before new input will be processed (to stop extremely rapid movement)
-    @current_column += 1
-    10
+  def move_left_or_right(move_left:)
+    @current_column = if move_left
+                        # Decrement player position to a minimum of 5 so we don't try and generate unneeded negative-value areas in the @map_hash
+                        [@current_column - 1, 5].max
+                      else
+                        # Increment player position
+                        @current_column + 1
+                      end
   end
 end

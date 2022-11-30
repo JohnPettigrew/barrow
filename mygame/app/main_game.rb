@@ -8,6 +8,7 @@ class MainGame
   
   def initialize
     @start_new_game = @game_in_progress = false
+    @default_wait = 10
     @wait_counter = -1
     @screen_height = 720
     @screen_width = 1280
@@ -23,10 +24,7 @@ class MainGame
 
     def welcome_screen
       draw_welcome_screen
-      if @wait_counter.negative?
-        update_welcome_menu(move_up: true) if inputs.up
-        update_welcome_menu(move_up: false) if inputs.down
-      end
+      update_welcome_menu(move_up: inputs.up) if @wait_counter.negative? && !inputs.up_down.zero?
       welcome_menu_action if inputs.keyboard.key_down.enter
       @wait_counter -= 1 unless @wait_counter.negative?
     end
@@ -40,8 +38,8 @@ class MainGame
     end
 
     def update_welcome_menu(move_up:)
-      @welcome_menu.update_selection(move_up: move_up)
-      @wait_counter = 10
+      @welcome_menu.move_up_or_down(move_up: move_up)
+      @wait_counter = @default_wait
     end
 
     def welcome_menu_action
@@ -72,12 +70,9 @@ class MainGame
 
     def handle_game_inputs
       if @wait_counter.negative?
-        @wait_counter = @player.move_down if inputs.down
-        @wait_counter = @player.move_up if inputs.up
-        @wait_counter = @player.move_left if inputs.left
-        @wait_counter = @player.move_right if inputs.right
-        outputs.labels << {x: 40, y: 40, text: @player.current_row} if inputs.down || inputs.up
-        outputs.labels << {x: 40, y: 40, text: @player.current_column} if inputs.left || inputs.right
+        @player.move_up_down(move_up: inputs.up) unless inputs.up_down.zero?
+        @player.move_left_or_right(move_left: inputs.left) unless inputs.left_right.zero?
+        @wait_counter = @default_wait unless inputs.up_down.zero? && inputs.left_right.zero?
       end
       @start_new_game = false if inputs.keyboard.key_down.escape
       @wait_counter -= 1 unless @wait_counter.negative?
@@ -97,7 +92,7 @@ class MainGame
       outputs.sprites << @player
       @map.current_area.each_with_index do |row, r|
         row.each_with_index do |cell, c|
-          cell.size(size: 72).set_position(horizontal_offset: @status_area_width + @map_location_size * c, vertical_offset: @map_location_size * (10 - r))
+          cell.size(size: 72).set_position(horizontal_offset: @status_area_width + @map_location_size * c, vertical_offset: @map_location_size * r)
           outputs.solids << cell
         end
       end
