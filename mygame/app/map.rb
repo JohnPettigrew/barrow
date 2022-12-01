@@ -1,38 +1,49 @@
 class Map
-  START_TILE_DEFINITION = [
-                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
-                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
-                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
-                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
-                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
-                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
-                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
-                            [0,0,0,0,0,0,0,1,0,0,0,0,0,0],
-                            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                            [1,1,1,1,2,1,1,1,1,1,2,1,1,1],
-                            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                            [1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-                          ].freeze
-    
+  MAP_DEFINITIONS = {
+    start:[
+            [0,0,0,0,0,1,0,0,0,0,0],
+            [0,0,0,0,0,1,0,0,0,0,0],
+            [0,0,0,0,0,1,0,0,0,0,0],
+            [0,0,0,0,0,1,0,0,0,0,0],
+            [0,0,0,0,0,1,0,0,0,0,0],
+            [1,1,1,1,1,1,1,1,1,1,1],
+            [1,1,2,1,1,1,1,1,2,1,1],
+            [1,1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1,1]
+          ].freeze,
+    default:[
+              [1,0,1,0,1,0,1,0,1,0,1],
+              [1,0,1,0,1,0,1,0,1,0,1],
+              [1,0,1,0,1,0,1,0,1,0,1],
+              [1,0,1,0,1,0,1,0,1,0,1],
+              [1,0,1,0,1,0,1,0,1,0,1],
+              [1,0,1,0,1,0,1,0,1,0,1],
+              [1,0,1,0,1,0,1,0,1,0,1],
+              [1,0,1,0,1,0,1,0,1,0,1],
+              [1,0,1,0,1,0,1,0,1,0,1],
+              [1,0,1,0,1,0,1,0,1,0,1],
+              [1,0,1,0,1,0,1,0,1,0,1],
+            ].freeze
+    }.freeze
+
   def initialize(map_area_width:, player:)
     @map_area_width = map_area_width
     @player = player
-    @tile_size = 7
-    create_tile(definition: START_TILE_DEFINITION, origin_x: 7000, origin_y: 0)
+    @map_hash = {}
+    @tile_size = 11
+    create_tile(definition_selector: :start, origin_x: 1100, origin_y: 0)
   end
 
   def current_area
     create_required_new_adjacent_tiles
     screen_area = []
     # Screen area is 10x10 locations
-    origin_x = [@player.current_column, 0].max
-    origin_y = [@player.current_row, 0].max
     10.times do |r|
       screen_area[r] = []
-      row = r + origin_y - 5 # Start map 5 locations below the player (10x10 grid)
-      10.times { |c| screen_area[r][c] = @map_hash["row_#{row}".to_sym]["column_#{c + origin_x - 5}".to_sym]}
+      row = r + @player.current_row - 5 # Start map 5 locations below the player (10x10 grid)
+      10.times { |c| screen_area[r][c] = @map_hash["row_#{row}".to_sym]["column_#{c + @player.current_column - 5}".to_sym] }
     end
     screen_area
   end
@@ -40,6 +51,9 @@ class Map
   def create_required_new_adjacent_tiles
     # Check the four directions, then if any new tiles are needed, create them using the returned origin coordinates
     missing_adjacent_tiles(x: @player.current_column, y: @player.current_row).each do |direction, origin|
+      # x=@player.current_column
+      # y=@player.current_row
+      # repl { puts "x #{x} y #{y}, direction #{direction} origin #{origin}\n"} if direction
       case direction
       when :up, :down
         origin_x = round_down_to_tile_edge(number: @player.current_column)
@@ -48,55 +62,46 @@ class Map
         origin_x = origin
         origin_y = round_down_to_tile_edge(number: @player.current_row)
       end
-      # create_tile(
-      #   definition: START_TILE_DEFINITION, 
-      #   origin_x: origin_x, 
-      #   origin_y: origin_y
-      # )
+      create_tile(definition_selector: :default, origin_x: origin_x, origin_y: origin_y)
     end
   end
 
   def missing_adjacent_tiles(x:, y:)
-    # Round player position to nearest 10 (tile boundaries) and return the origin point for any required new tiles
     value = {}
-    edge_top = round_up_to_tile_edge(number: y)
-    edge_condition = (edge_top - y < 6) && @map_hash["row_#{edge_top}".to_sym].nil?
-    value[:up] = edge_top if edge_condition
-    edge_bottom = [round_down_to_tile_edge(number: y) - 1, 0].max
-    edge_condition = (y - edge_bottom < 6) && @map_hash["row_#{edge_bottom}".to_sym].nil?
-    value[:down] = edge_bottom - @tile_size if edge_condition
-    edge_left = [round_down_to_tile_edge(number: x) - 1, 0].max
-    edge_condition = (x - edge_left < 6) && @map_hash["row_#{edge_left}".to_sym].nil?
-    value[:left] = edge_left if edge_condition
-    edge_right = round_up_to_tile_edge(number: x)
-    edge_condition = (edge_right - x < 6) && @map_hash["row_#{edge_right}".to_sym].nil?
-    value[:right] = edge_right - @tile_size if edge_condition
+    # Check one row above the current tile - if it's nil then we'll need to create it
+    value[:up] = round_up_to_tile_edge(number: y) if @map_hash["row_#{y + 5}".to_sym].nil?
+    # Check one row below the current tile - if it's nil then we'll need to create it
+    value[:down] = (round_down_to_tile_edge(number: y) - @tile_size) if @map_hash["row_#{y - 5}".to_sym].nil?
+    # Check one row to the left of the current tile - if it's nil then we'll need to create it
+    value[:left] = (round_down_to_tile_edge(number: x) - @tile_size) if @map_hash["row_#{y}".to_sym]["column_#{x - 5}".to_sym].nil?
+    # Check one row to the right of the current tile - if it's nil then we'll need to create it
+    value[:right] = round_up_to_tile_edge(number: x) if @map_hash["row_#{y}".to_sym]["column_#{x + 5}".to_sym].nil?
+    # Return a hash with an entry for each direction where a new tile is needed, and the origin point for that new tile.
     value
   end
 
   def round_down_to_tile_edge(number:)
-    (number / @tile_size).floor * @tile_size
+    ((number / @tile_size).floor * @tile_size).to_i # Must return an integer
   end
 
   def round_up_to_tile_edge(number:)
-    (number / @tile_size).ceil * @tile_size
+    ((number.to_f / @tile_size).ceil * @tile_size).to_i # Must return an integer
   end
 
-  def create_tile(definition:, origin_x:, origin_y:)
+  def create_tile(definition_selector:, origin_x:, origin_y:)
     # The tile is a hash of hashes, and each defines a Location object:
     # {
     #   row_0: {column_7000: <Location...>, column_7001: <Location...>, ...}, 
     #   row_1: {column_7000: <Location...>, column_7001: <Location...>, ...},
     #   row_2: {column_7000: <Location...>, column_7001: <Location...>, ...}
     # }
-    @map_hash = {}
-    definition.size.times do |r|
+    MAP_DEFINITIONS[definition_selector].size.times do |r|
       row = r + origin_y
-      @map_hash["row_#{row}".to_sym] = {}
-      definition.first.size.times do |c|
+      @map_hash["row_#{row}".to_sym] ||= {}
+      MAP_DEFINITIONS[definition_selector].first.size.times do |c|
         column = c + origin_x
         # In the next line, we reverse the definition array because its (visually) bottom row will be the first (bottom and thus first) row of the actual map, but it is last in the definition array
-        @map_hash["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(location_value: definition.reverse[r][c])
+        @map_hash["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(location_value: MAP_DEFINITIONS[definition_selector].reverse[r][c])
       end
     end
   end

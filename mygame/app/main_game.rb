@@ -70,7 +70,7 @@ class MainGame
 
     def handle_game_inputs
       if @wait_counter.negative?
-        @player.move_up_down(move_up: inputs.up) unless inputs.up_down.zero?
+        @player.move_up_or_down(move_up: inputs.up) unless inputs.up_down.zero?
         @player.move_left_or_right(move_left: inputs.left) unless inputs.left_right.zero?
         @wait_counter = @default_wait unless inputs.up_down.zero? && inputs.left_right.zero?
       end
@@ -92,7 +92,7 @@ class MainGame
       outputs.sprites << @player
       @map.current_area.each_with_index do |row, r|
         row.each_with_index do |cell, c|
-          cell.size(size: 72).set_position(horizontal_offset: @status_area_width + @map_location_size * c, vertical_offset: @map_location_size * r)
+          cell.size(size: 72).set_position(horizontal_offset: @status_area_width + @map_location_size * c, vertical_offset: @map_location_size * r) unless cell.nil? # Allow display of nonexistent cells, because these may arise from uncreated tiles in diagonal directions
           outputs.solids << cell
         end
       end

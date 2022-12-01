@@ -12,10 +12,14 @@ class Player
     @h = location_size - @padding * 2
     @path = path
     @angle = angle
-    # Start row is 5 because the start tile is (currently) 14 rows high and this will put the centre of the viewport at the right place.
+    # Start row is 5 to put the centre of the viewport at the right place.
     @current_row = 5
-    # Start column is 7000 so that we have lots of space to wander the barrow, while being an easy multiple of the map tile size of 7.
-    @current_column = 7007
+    # Start column is 1100 + 5 so that we have lots of space to wander the barrow, while being 5 more than an easy multiple of the map tile size of 11.
+    @current_column = 1105
+  end
+
+  def serialize
+    { player: { x: @x, y: @y, w: @w, h: @h, path: @path, angle: @angle, current_row: @current_row, current_column: @current_column }}
   end
 
   def move_up_or_down(move_up:)
