@@ -179,15 +179,13 @@ class Map
 
   def create_required_new_adjacent_tiles
     missing_adjacent_tiles(x: @player.current_column, y: @player.current_row).each do |direction, origin|
-      case direction
-      when :up, :down
-        origin_x = round_down_to_tile_edge(number: @player.current_column)
-        origin_y = origin
-      when :left, :right
-        origin_x = origin
-        origin_y = round_down_to_tile_edge(number: @player.current_row)
-      end
-      selector = (origin_x.zero? || origin_y.zero?) ? :solid : TILE_ENTRY_POINTS[direction].sample
+      origin_x, origin_y = case direction
+                           when :up, :down
+                             [round_down_to_tile_edge(number: @player.current_column), origin]
+                           when :left, :right
+                             [origin, round_down_to_tile_edge(number: @player.current_row)]
+                           end
+      selector = origin_x.zero? || origin_y.zero? ? :solid : TILE_ENTRY_POINTS[direction].sample
       create_tile(definition_selector: selector, origin_x: origin_x, origin_y: origin_y)
     end
   end
