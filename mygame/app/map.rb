@@ -187,11 +187,8 @@ class Map
         origin_x = origin
         origin_y = round_down_to_tile_edge(number: @player.current_row)
       end
-      if origin_x.zero? || origin_y.zero?
-        create_tile(definition_selector: :solid, origin_x: origin_x, origin_y: origin_y)
-      else
-        create_tile(definition_selector: TILE_ENTRY_POINTS[direction].sample, origin_x: origin_x, origin_y: origin_y)
-      end
+      selector = (origin_x.zero? || origin_y.zero?) ? :solid : TILE_ENTRY_POINTS[direction].sample
+      create_tile(definition_selector: selector, origin_x: origin_x, origin_y: origin_y)
     end
   end
 
