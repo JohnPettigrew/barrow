@@ -17,31 +17,46 @@ class Map
       [0,0,0,0,0,0,1,0,0,0,0,0,0],
       [0,0,0,0,0,0,1,0,0,0,0,0,0],
       [0,0,0,0,0,0,1,0,0,0,0,0,0],
-      [0,0,0,0,0,0,1,0,0,0,0,0,0],
-      [0,0,0,0,0,0,1,0,0,0,0,0,0],
-      [0,0,0,0,0,0,1,0,0,0,0,0,0],
       [0,0,0,0,0,1,1,1,0,0,0,0,0],
       [0,0,0,0,1,1,1,1,1,0,0,0,0],
       [0,0,0,1,1,1,1,1,1,1,0,0,0],
       [0,0,1,2,1,1,1,1,2,1,1,0,0],
       [0,1,1,1,1,1,1,1,1,1,1,1,0],
       [1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1],
       [1,1,1,1,1,1,1,1,1,1,1,1,1]
     ].freeze,
-    default:[
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1]
+    start_left:[
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [0,0,0,0,0,0,0,0,0,0,0,1,1],
+      [0,0,0,0,0,0,0,0,0,0,1,1,1],
+      [0,0,0,0,0,0,0,0,0,1,1,1,1]
+    ].freeze,
+    start_right:[
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0],
+      [1,1,0,0,0,0,0,0,0,0,0,0,0],
+      [1,1,1,0,0,0,0,0,0,0,0,0,0],
+      [1,1,1,1,0,0,0,0,0,0,0,0,0],
     ].freeze,
     tile_000:[
       [1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -109,25 +124,40 @@ class Map
     up: [:tile_000, :tile_001, :tile_003].freeze,
     down: [:tile_000, :tile_001, :tile_003].freeze,
     left: [:tile_000, :tile_001, :tile_002].freeze,
-    right: [:tile_000, :tile_001, :tile_002].freeze
+    right: [:tile_000, :tile_001, :tile_002].freeze,
+    up_down: [:tile_000, :tile_001, :tile_003].freeze,
+    left_right: [:tile_000, :tile_001, :tile_002].freeze,
+    up_left: [:tile_000, :tile_001].freeze,
+    up_right: [:tile_000, :tile_001].freeze,
+    down_left: [:tile_000, :tile_001].freeze,
+    down_right: [:tile_000, :tile_001].freeze,
+    up_down_left_right: [:tile_000, :tile_001].freeze
   }.freeze
 
-  def initialize(map_area_width:, player:)
-    @map_area_width = map_area_width
+  def initialize(player:, tile_size:, map_area_width:, map_scale:)
+    # player is the player object
+    # tile_size is how many locations are in a (square) tile
+    # map_area_width is the number of pixels in the (square) visible map area
+    # map_scale is how many locations are in the current_area displayed on screen
     @player = player
+    @tile_size = tile_size.to_i
+    @map_area_width = map_area_width.to_i
+    @map_scale = map_scale.to_i
     @map_hash = {}
-    @tile_size = 13
-    create_tile(definition_selector: :start, origin_x: 1300, origin_y: 0)
+    create_tile(definition_selector: :start, origin_x: tile_size * 100, origin_y: 0)
+    create_tile(definition_selector: :start_left, origin_x: tile_size * 99, origin_y: 0)
+    create_tile(definition_selector: :start_right, origin_x: tile_size * 101, origin_y: 0)
   end
 
   def current_area
     create_required_new_adjacent_tiles
+    # Player is in the centre of the map, so halve the dimension to get the centre position. This is integer division, so will round down if we have an odd @map_scale
+    centre_offset = (@map_scale / 2).to_i
     screen_area = []
-    # Screen area is 10x10 locations
-    10.times do |r|
+    @map_scale.times do |r|
       screen_area[r] = []
-      row = r + @player.current_row - 5 # Start map 5 locations below the player (10x10 grid)
-      10.times { |c| screen_area[r][c] = @map_hash["row_#{row}".to_sym]["column_#{c + @player.current_column - 5}".to_sym] }
+      row = r + @player.current_row - centre_offset
+      @map_scale.times { |c| screen_area[r][c] = @map_hash["row_#{row}".to_sym]["column_#{c + @player.current_column - centre_offset - 1}".to_sym] }
     end
     screen_area
   end
@@ -147,16 +177,17 @@ class Map
   end
 
   def missing_adjacent_tiles(x:, y:)
+    centre_offset = (@map_scale / 2).to_i
     value = {}
     # Have to check both whether the requested row is nil and whether it's present but doesn't contain the requested column
-    row = "row_#{y + 5}".to_sym
+    row = "row_#{y + centre_offset}".to_sym
     value[:up] = round_up_to_tile_edge(number: y) if @map_hash[row].nil? || @map_hash[row]["column_#{x}".to_sym].nil?
-    row = "row_#{y - 5}".to_sym
+    row = "row_#{y - centre_offset}".to_sym
     value[:down] = (round_down_to_tile_edge(number: y) - @tile_size) if @map_hash[row].nil? || @map_hash[row]["column_#{x}".to_sym].nil?
     # Requested row cannot be nil for the next options (if we're moving left/right, and we don't care about diagonals) because player stays on same row
     row = "row_#{y}".to_sym
-    value[:left] = (round_down_to_tile_edge(number: x) - @tile_size) if @map_hash[row]["column_#{x - 5}".to_sym].nil?
-    value[:right] = round_up_to_tile_edge(number: x) if @map_hash[row]["column_#{x + 5}".to_sym].nil?
+    value[:left] = (round_down_to_tile_edge(number: x) - @tile_size) if @map_hash[row]["column_#{x - centre_offset}".to_sym].nil?
+    value[:right] = round_up_to_tile_edge(number: x) if @map_hash[row]["column_#{x + centre_offset}".to_sym].nil?
     value
   end
 
@@ -170,7 +201,6 @@ class Map
 
   def create_tile(definition_selector:, origin_x:, origin_y:)
     return unless @map_hash["row_#{origin_y}".to_sym].nil? || @map_hash["row_#{origin_y}".to_sym]["column_#{origin_x}".to_sym].nil?
-
     # The tile is a hash of hashes, and each defines a Location object:
     # {
     #   row_0: {column_7000: <Location...>, column_7001: <Location...>, ...}, 

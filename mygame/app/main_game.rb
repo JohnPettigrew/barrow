@@ -8,11 +8,13 @@ class MainGame
   def initialize
     @show_welcome_screen = true
     @game_in_progress = false
-    @default_wait = 10
+    @default_wait = 5
     @wait_counter = -1
     @screen_height = 720
     @screen_width = 1280
-    @map_location_size = 72
+    @map_scale = 16
+    @tile_size = 13
+    @map_location_size = (@screen_height / @map_scale).to_i
     @status_area_width = @screen_width - @screen_height
   end
 
@@ -61,9 +63,11 @@ class MainGame
     end
 
     def initialise_new_game
+      # Calculations to ensure consistent dimensions throughout the objects.
+      # These assume that the displayed area of map is square, using the height as the fixed dimension
       half_map_size = @screen_height / 2
-      @player = Player.new(x: @status_area_width + half_map_size, y: half_map_size, location_size: @map_location_size, path: SPRITE_PATHS[:player], angle: 90)
-      @map = Map.new(map_area_width: half_map_size * 2, player: @player)
+      @player = Player.new(x: @status_area_width + half_map_size, y: half_map_size, path: SPRITE_PATHS[:player], angle: 90, location_size: @map_location_size, tile_size: @tile_size, map_scale: @map_scale)
+      @map = Map.new(player: @player, tile_size: @tile_size, map_area_width: half_map_size * 2, map_scale: @map_scale)
       @treasures = @inventory_lights = @inventory_axes = 0
       @game_in_progress = true
     end
@@ -90,6 +94,7 @@ class MainGame
 
     def draw_map_area
       outputs.sprites << @player
+      outputs.labels  << {x: 40, y: @screen_height - 60, text: "player: #{@player.current_row}/#{@player.current_column}", size_enum: 5}
       @map.current_area.each_with_index do |row, r|
         row.each_with_index do |cell, c|
           cell.size(size: 72).set_position(horizontal_offset: @status_area_width + @map_location_size * c, vertical_offset: @map_location_size * r) unless cell.nil? # Allow display of nonexistent cells, because these may arise from uncreated tiles in diagonal directions
