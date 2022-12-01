@@ -14,8 +14,8 @@ class Player
     @angle = angle
     # Start row is 5 to put the centre of the viewport at the right place.
     @current_row = 5
-    # Start column is 1100 + 5 so that we have lots of space to wander the barrow, while being 5 more than an easy multiple of the map tile size of 11.
-    @current_column = 1105
+    # Start column is 1300 + 6 so that we have lots of space to wander the barrow, while being in the middle of the map tile size of 13.
+    @current_column = 1306
   end
 
   def serialize
