@@ -49,11 +49,7 @@ class Map
   end
 
   def create_required_new_adjacent_tiles
-    # Check the four directions, then if any new tiles are needed, create them using the returned origin coordinates
     missing_adjacent_tiles(x: @player.current_column, y: @player.current_row).each do |direction, origin|
-      # x=@player.current_column
-      # y=@player.current_row
-      # repl { puts "x #{x} y #{y}, direction #{direction} origin #{origin}\n"} if direction
       case direction
       when :up, :down
         origin_x = round_down_to_tile_edge(number: @player.current_column)
@@ -68,15 +64,15 @@ class Map
 
   def missing_adjacent_tiles(x:, y:)
     value = {}
-    # Check one row above the current tile - if it's nil then we'll need to create it
-    value[:up] = round_up_to_tile_edge(number: y) if @map_hash["row_#{y + 5}".to_sym].nil?
-    # Check one row below the current tile - if it's nil then we'll need to create it
-    value[:down] = (round_down_to_tile_edge(number: y) - @tile_size) if @map_hash["row_#{y - 5}".to_sym].nil?
-    # Check one row to the left of the current tile - if it's nil then we'll need to create it
-    value[:left] = (round_down_to_tile_edge(number: x) - @tile_size) if @map_hash["row_#{y}".to_sym]["column_#{x - 5}".to_sym].nil?
-    # Check one row to the right of the current tile - if it's nil then we'll need to create it
-    value[:right] = round_up_to_tile_edge(number: x) if @map_hash["row_#{y}".to_sym]["column_#{x + 5}".to_sym].nil?
-    # Return a hash with an entry for each direction where a new tile is needed, and the origin point for that new tile.
+    # Have to check both whether the requested row is nil and whether it's present but doesn't contain the requested column
+    row = "row_#{y + 5}".to_sym
+    value[:up] = round_up_to_tile_edge(number: y) if @map_hash[row].nil? || @map_hash[row]["column_#{x}".to_sym].nil?
+    row = "row_#{y - 5}".to_sym
+    value[:down] = (round_down_to_tile_edge(number: y) - @tile_size) if @map_hash[row].nil? || @map_hash[row]["column_#{x}".to_sym].nil?
+    # Requested row cannot be nil for the next options (if we're moving left/right, and we don't care about diagonals) because player stays on same row
+    row = "row_#{y}".to_sym
+    value[:left] = (round_down_to_tile_edge(number: x) - @tile_size) if @map_hash[row]["column_#{x - 5}".to_sym].nil?
+    value[:right] = round_up_to_tile_edge(number: x) if @map_hash[row]["column_#{x + 5}".to_sym].nil?
     value
   end
 
@@ -89,6 +85,8 @@ class Map
   end
 
   def create_tile(definition_selector:, origin_x:, origin_y:)
+    return unless @map_hash["row_#{origin_y}".to_sym].nil? || @map_hash["row_#{origin_y}".to_sym]["column_#{origin_x}".to_sym].nil?
+
     # The tile is a hash of hashes, and each defines a Location object:
     # {
     #   row_0: {column_7000: <Location...>, column_7001: <Location...>, ...}, 
