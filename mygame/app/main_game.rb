@@ -2,8 +2,7 @@ class MainGame
   attr_gtk
 
   SPRITE_PATHS = {
-    player: 'mygame/sprites/circle/gray.png',
-    logo: 'dragonruby.png'
+    player: 'mygame/sprites/circle/gray.png'
   }.freeze
   
   def initialize
@@ -18,7 +17,7 @@ class MainGame
   end
 
   def tick
-    @show_welcome_screen ? welcome_screen : new_game
+    @show_welcome_screen ? welcome_screen : game
   end
 
   private
@@ -31,11 +30,9 @@ class MainGame
     end
 
     def draw_welcome_screen
-      @welcome_menu ||= Menu.new(entries: [ {value: 'Start game', selected: true}, {value: 'High scores'}, {value: 'Rules'}, {value: 'Quit'} ])
-      @welcome_menu.render(args: @args, top: 420)
       outputs.labels  << { x: @screen_width / 2, y: 500, text: 'Welcome to the barrow!', size_enum: 10, alignment_enum: 1 }
-      logo_width = 128
-      outputs.sprites << { x: @screen_width / 2 - logo_width / 2, y: 140, w: logo_width, h: 101, path: SPRITE_PATHS[:logo] }  
+      @welcome_menu ||= Menu.new(entries: [ {value: 'New game', selected: true}, {value: 'Resume game'}, {value: 'High scores'}, {value: 'Rules'}, {value: 'Quit'} ])
+      @welcome_menu.render(args: @args, top: 420)
     end
 
     def update_welcome_menu(move_up:)
@@ -45,7 +42,9 @@ class MainGame
 
     def welcome_menu_action
       case @welcome_menu.selected_entry
-      when 'Start game'
+      when 'New game'
+        @show_welcome_screen = @game_in_progress = false
+      when 'Resume game'
         @show_welcome_screen = false
       when 'High scores'
       when 'Rules'
@@ -54,7 +53,7 @@ class MainGame
       end
     end
 
-    def new_game
+    def game
       initialise_new_game unless @game_in_progress
       draw_status_area
       draw_map_area
@@ -75,10 +74,7 @@ class MainGame
         @player.move_left_or_right(move_left: inputs.left) unless inputs.left_right.zero?
         @wait_counter = @default_wait unless inputs.up_down.zero? && inputs.left_right.zero?
       end
-      if inputs.keyboard.key_down.escape
-        @show_welcome_screen = true
-        @game_in_progress = false
-      end
+      @show_welcome_screen = true if inputs.keyboard.key_down.escape
       @wait_counter -= 1 unless @wait_counter.negative?
     end
 

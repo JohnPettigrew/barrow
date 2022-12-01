@@ -15,7 +15,7 @@ class Menu
     selected_entry_index = @entries.find_index { |entry| entry.selected }
     @entries[selected_entry_index].disable
     incrementer = move_up ? -1 : 1
-    @entries[(selected_entry_index + incrementer).clamp(0,3)].enable
+    @entries[(selected_entry_index + incrementer).clamp(0, @entries.size - 1)].enable
   end
 
   def render(args:, top:)
