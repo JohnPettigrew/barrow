@@ -3,6 +3,8 @@
 
 # track this file
 !.gitignore
+!/README.md
+!/LICENSE.md
 
 # whitelist everything in ./mygame/
 !mygame/*
