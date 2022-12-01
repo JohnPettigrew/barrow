@@ -7,7 +7,8 @@ class MainGame
   }.freeze
   
   def initialize
-    @start_new_game = @game_in_progress = false
+    @show_welcome_screen = true
+    @game_in_progress = false
     @default_wait = 10
     @wait_counter = -1
     @screen_height = 720
@@ -17,7 +18,7 @@ class MainGame
   end
 
   def tick
-    @start_new_game ? new_game : welcome_screen
+    @show_welcome_screen ? welcome_screen : new_game
   end
 
   private
@@ -45,7 +46,7 @@ class MainGame
     def welcome_menu_action
       case @welcome_menu.selected_entry
       when 'Start game'
-        @start_new_game = true
+        @show_welcome_screen = false
       when 'High scores'
       when 'Rules'
       else
@@ -74,7 +75,7 @@ class MainGame
         @player.move_left_or_right(move_left: inputs.left) unless inputs.left_right.zero?
         @wait_counter = @default_wait unless inputs.up_down.zero? && inputs.left_right.zero?
       end
-      @start_new_game = false if inputs.keyboard.key_down.escape
+      @show_welcome_screen = true if inputs.keyboard.key_down.escape
       @wait_counter -= 1 unless @wait_counter.negative?
     end
 
