@@ -58,6 +58,21 @@ class Map
       [1,1,1,0,0,0,0,0,0,0,0,0,0],
       [1,1,1,1,0,0,0,0,0,0,0,0,0],
     ].freeze,
+    solid:[
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+    ].freeze,
     tile_000:[
       [1,1,1,1,1,1,1,1,1,1,1,1,1],
       [1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -172,7 +187,11 @@ class Map
         origin_x = origin
         origin_y = round_down_to_tile_edge(number: @player.current_row)
       end
-      create_tile(definition_selector: TILE_ENTRY_POINTS[direction].sample, origin_x: origin_x, origin_y: origin_y)
+      if origin_x.zero? || origin_y.zero?
+        create_tile(definition_selector: :solid, origin_x: origin_x, origin_y: origin_y)
+      else
+        create_tile(definition_selector: TILE_ENTRY_POINTS[direction].sample, origin_x: origin_x, origin_y: origin_y)
+      end
     end
   end
 
