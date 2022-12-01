@@ -75,7 +75,10 @@ class MainGame
         @player.move_left_or_right(move_left: inputs.left) unless inputs.left_right.zero?
         @wait_counter = @default_wait unless inputs.up_down.zero? && inputs.left_right.zero?
       end
-      @show_welcome_screen = true if inputs.keyboard.key_down.escape
+      if inputs.keyboard.key_down.escape
+        @show_welcome_screen = true
+        @game_in_progress = false
+      end
       @wait_counter -= 1 unless @wait_counter.negative?
     end
 
