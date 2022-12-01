@@ -103,68 +103,68 @@ class Map
       end
     end
   end
-end
 
-class Location
-  attr_sprite
-  attr_accessor :x
+  class Location
+    attr_sprite
+    attr_accessor :x
 
-  def initialize(location_value:, discoverable: false, light: false, rockfall: false)
-    @background = location_value.zero?
-    @light = light || (@type == 2) ? true : false
-    @discoverable = discoverable
-    @rockfall = rockfall
-    @x = @y = @size = 0
-  end
+    def initialize(location_value:, discoverable: false, light: false, rockfall: false)
+      @background = location_value.zero?
+      @light = light || (@type == 2) ? true : false
+      @discoverable = discoverable
+      @rockfall = rockfall
+      @x = @y = @size = 0
+    end
 
-  def size(size:)
-    @size = size
-    self
-  end
+    def size(size:)
+      @size = size
+      self
+    end
 
-  def set_position(horizontal_offset:, vertical_offset:)
-    @x = horizontal_offset
-    @y = vertical_offset
-  end
+    def set_position(horizontal_offset:, vertical_offset:)
+      @x = horizontal_offset
+      @y = vertical_offset
+    end
 
-  def background?
-    @background
-  end
+    def background?
+      @background
+    end
 
-  def path?
-    !@background
-  end
+    def path?
+      !@background
+    end
 
-  def light?
-    @light
-  end
+    def light?
+      @light
+    end
 
-  def discoverable?
-    @discoverable
-  end
+    def discoverable?
+      @discoverable
+    end
 
-  def rockfall?
-    @rockfall
-  end
+    def rockfall?
+      @rockfall
+    end
 
-  def w
-    @size
-  end
+    def w
+      @size
+    end
 
-  def h
-    @size
-  end
+    def h
+      @size
+    end
 
-  # Methods #r, #g and #b needed only because we're rendering the location as a solid for now   
-  def r
-    self.background? ? 50 : 250
-  end
+    # Methods #r, #g and #b needed only because we're rendering the location as a solid for now   
+    def r
+      self.background? ? 50 : 250
+    end
 
-  def g
-    self.background? ? 50 : 250
-  end
+    def g
+      self.background? ? 50 : 250
+    end
 
-  def b
-    self.background? ? 50 : 250
+    def b
+      self.background? ? 50 : 250
+    end
   end
 end
