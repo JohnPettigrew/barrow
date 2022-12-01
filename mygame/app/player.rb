@@ -17,7 +17,7 @@ class Player
     # Start row to put the centre of the viewport at the right place.
     @current_row = @movement_limit
     # Start position is 100 times the @tile_size so that we have lots of space to wander the barrow. And we add half the @tile_size (as the already-defined @current_row) so the player is in the middle of the screen.
-    @current_column = tile_size * 100 + @current_row - 1
+    @current_column = tile_size * 100 + @current_row - 2
   end
 
   def serialize

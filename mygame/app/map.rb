@@ -157,7 +157,7 @@ class Map
     @map_scale.times do |r|
       screen_area[r] = []
       row = r + @player.current_row - centre_offset
-      @map_scale.times { |c| screen_area[r][c] = @map_hash["row_#{row}".to_sym]["column_#{c + @player.current_column - centre_offset - 1}".to_sym] }
+      @map_scale.times { |c| screen_area[r][c] = @map_hash["row_#{row}".to_sym]["column_#{c + @player.current_column - centre_offset}".to_sym] }
     end
     screen_area
   end
@@ -216,6 +216,10 @@ class Map
         @map_hash["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(location_value: MAP_DEFINITIONS[definition_selector].reverse[r][c])
       end
     end
+  end
+
+  def location_accessible?(x:, y:)
+    !@map_hash["row_#{y}".to_sym]["column_#{x}".to_sym].background?
   end
 
   class Location
