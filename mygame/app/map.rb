@@ -198,7 +198,7 @@ class Map
     value[:up] = round_up_to_tile_edge(number: y) if @map_hash[row].nil? || @map_hash[row]["column_#{x}".to_sym].nil?
     row = "row_#{y - centre_offset}".to_sym
     value[:down] = (round_down_to_tile_edge(number: y) - @tile_size) if @map_hash[row].nil? || @map_hash[row]["column_#{x}".to_sym].nil?
-    # Requested row cannot be nil for the next options (if we're moving left/right, and we don't care about diagonals) because player stays on same row
+    # Requested row won't be nil for the next options (if we're moving left/right, and we don't care about diagonals) because player stays on same row, so no need to check for it
     row = "row_#{y}".to_sym
     value[:left] = (round_down_to_tile_edge(number: x) - @tile_size) if @map_hash[row]["column_#{x - centre_offset}".to_sym].nil?
     value[:right] = round_up_to_tile_edge(number: x) if @map_hash[row]["column_#{x + centre_offset}".to_sym].nil?
@@ -206,15 +206,16 @@ class Map
   end
 
   def round_down_to_tile_edge(number:)
-    ((number / @tile_size).floor * @tile_size).to_i # Must return an integer
+    ((number / @tile_size).floor * @tile_size).to_i # We need to return an integer
   end
 
   def round_up_to_tile_edge(number:)
-    ((number.to_f / @tile_size).ceil * @tile_size).to_i # Must return an integer
+    ((number.to_f / @tile_size).ceil * @tile_size).to_i # We need to return an integer
   end
 
   def create_tile(definition_selector:, origin_x:, origin_y:)
     return unless @map_hash["row_#{origin_y}".to_sym].nil? || @map_hash["row_#{origin_y}".to_sym]["column_#{origin_x}".to_sym].nil?
+
     # The tile is a hash of hashes, and each defines a Location object:
     # {
     #   row_0: {column_7000: <Location...>, column_7001: <Location...>, ...}, 
@@ -224,16 +225,12 @@ class Map
     MAP_DEFINITIONS[definition_selector].size.times do |r|
       row = r + origin_y
       @map_hash["row_#{row}".to_sym] ||= {}
-      MAP_DEFINITIONS[definition_selector].first.size.times do |c|
-        column = c + origin_x
-        # In the next line, we reverse the definition array because its (visually) bottom row will be the first (bottom and thus first) row of the actual map, but it is last in the definition array
-        @map_hash["row_#{row}".to_sym]["column_#{column}".to_sym] = Location.new(location_value: MAP_DEFINITIONS[definition_selector].reverse[r][c])
-      end
+      MAP_DEFINITIONS[definition_selector].first.size.times { |c| @map_hash["row_#{row}".to_sym]["column_#{c + origin_x}".to_sym] = Location.new(location_value: MAP_DEFINITIONS[definition_selector].reverse[r][c]) }
     end
   end
 
   def location_accessible?(x:, y:)
-    !@map_hash["row_#{y}".to_sym]["column_#{x}".to_sym].background?
+    @map_hash["row_#{y}".to_sym]["column_#{x}".to_sym].path?
   end
 
   class Location
@@ -256,6 +253,7 @@ class Map
     def set_position(horizontal_offset:, vertical_offset:)
       @x = horizontal_offset
       @y = vertical_offset
+      self
     end
 
     def background?

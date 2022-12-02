@@ -32,7 +32,7 @@ class Menu
     attr_reader :value, :selected
 
     def initialize(value: 'Error: undefined menu item', selected: false)
-      # Defines a menu entry, and expects to receive the text value and whether it is currently selected
+      # Defines a menu entry, and expects to receive the text value and whether it is currently the selected item (implicitly singular but that's not enforced)
       @value = value.freeze
       @selected = selected
     end
