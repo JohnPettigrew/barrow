@@ -110,13 +110,14 @@ class MainGame
       outputs.sprites << @player
       easing_x, easing_y = get_easing_values
       # When scrolling the map, need to subtract 1 from row and column numbers because there's one extra row & column on each side of the returned current_area to allow smooth scrolling
-      @map.current_area.each_with_index do |row, r|
+      @map.current_area.update_line_of_sight.each_with_index do |row, r|
         row.each_with_index do |cell, c|
           horizontal_offset = @status_area_width + @map_location_size * (c - 1) + easing_x
           vertical_offset = @map_location_size * (r - 1) + easing_y
           outputs.solids << cell.size(size: @map_location_size).set_position(horizontal_offset: horizontal_offset, vertical_offset: vertical_offset) unless cell.nil? 
         end
       end
+      @map.current_area.reset_line_of_sight
     end
 
     def get_easing_values

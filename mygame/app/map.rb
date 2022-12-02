@@ -178,6 +178,35 @@ class Map
     screen_area
   end
 
+  def location_accessible?(x:, y:)
+    @map_hash["row_#{@player.current_row + y}".to_sym]["column_#{@player.current_column + x}".to_sym].path?
+  end
+
+  # Modified from http://docs.dragonruby.org.s3-website-us-east-1.amazonaws.com/#----rpg-roguelike---roguelike-line-of-sight---main-rb
+  def update_line_of_sight
+    variations = [-1, 0, 1].product([-1, 0, 1])
+    visible = variations.flat_map { |rise, run| thick_line_of_sight(rise, run)}.uniq
+    visible.each do |point| 
+      # Make point visible
+      @map_hash
+    end
+  end
+
+  def reset_line_of_sight
+    # Hide all cells by default, after the current area has been rendered
+
+  end
+
+  private
+
+  def cell_missing?(x:, y:)
+    @map_hash["row_#{y}".to_sym].nil? || @map_hash["row_#{y}".to_sym]["column_#{x}".to_sym].nil?
+  end
+
+  def cell_exists?(x:, y:)
+    !cell_missing?(x: x, y: y)
+  end
+
   def create_required_new_adjacent_tiles
     missing_adjacent_tiles(x: @player.current_column, y: @player.current_row).each do |direction, origin|
       origin_x, origin_y = case direction
@@ -192,18 +221,17 @@ class Map
   end
 
   def missing_adjacent_tiles(x:, y:)
-    centre_offset = (@map_scale / 2).to_i
-    value = {}
-    # Have to check both whether the requested row is nil and whether it's present but doesn't contain the requested column
-    row = "row_#{y + centre_offset}".to_sym
-    value[:up] = round_up_to_tile_edge(number: y) if @map_hash[row].nil? || @map_hash[row]["column_#{x}".to_sym].nil?
-    row = "row_#{y - centre_offset}".to_sym
-    value[:down] = (round_down_to_tile_edge(number: y) - @tile_size) if @map_hash[row].nil? || @map_hash[row]["column_#{x}".to_sym].nil?
-    # Requested row won't be nil for the next options (if we're moving left/right, and we don't care about diagonals) because player stays on same row, so no need to check for it
-    row = "row_#{y}".to_sym
-    value[:left] = (round_down_to_tile_edge(number: x) - @tile_size) if @map_hash[row]["column_#{x - centre_offset}".to_sym].nil?
-    value[:right] = round_up_to_tile_edge(number: x) if @map_hash[row]["column_#{x + centre_offset}".to_sym].nil?
-    value
+    offset = (@map_scale / 2).to_i
+    result = {}
+    { 
+      up: { x: x, y: y + offset, origin: round_up_to_tile_edge(number: y)}, 
+      down: {x: x, y: y - offset, origin: round_down_to_tile_edge(number: y) - @tile_size},
+      left: {x: x - offset, y: y, origin: round_down_to_tile_edge(number: x) - @tile_size},
+      right: {x: x + offset, y: y, origin: round_up_to_tile_edge(number: x)}
+    }.each do |key, value|
+      result[key] = value[:origin] if cell_missing?(x: value[:x], y: value[:y])
+    end
+    result
   end
 
   def round_down_to_tile_edge(number:)
@@ -230,8 +258,22 @@ class Map
     end
   end
 
-  def location_accessible?(x:, y:)
-    @map_hash["row_#{@player.current_row + y}".to_sym]["column_#{@player.current_column + x}".to_sym].path?
+  # Modified from http://docs.dragonruby.org.s3-website-us-east-1.amazonaws.com/#----rpg-roguelike---roguelike-line-of-sight---main-rb
+  def line_of_sight(rise:, run:)
+    result = []
+    points_on_line(rise, run).each do |point|
+      if cell_exists?(x: point.x, y: point.y)
+        result << point # add point to result collection
+      else
+        return result # return result collection as it is
+      end
+    end
+    result
+  end
+
+  # Modified from http://docs.dragonruby.org.s3-website-us-east-1.amazonaws.com/#----rpg-roguelike---roguelike-line-of-sight---main-rb
+  def points_on_line(rise:, run:)
+    @map_scale.times.map { |i| [@player.current_column + run * i, @player.current_row + rise * i] }
   end
 
   class Location
@@ -244,6 +286,7 @@ class Map
       @discoverable = discoverable
       @rockfall = rockfall
       @x = @y = @size = 0
+      @visible = false
     end
 
     def size(size:)
@@ -263,6 +306,14 @@ class Map
 
     def path?
       !@background
+    end
+
+    def visible=(visible:)
+      @visible = visible
+    end
+
+    def visible?
+      @visible
     end
 
     def light?
