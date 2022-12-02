@@ -15,13 +15,13 @@ class Map
       [0,0,0,0,0,0,1,0,0,0,0,0,0],
       [0,0,0,0,0,0,1,0,0,0,0,0,0],
       [0,0,0,0,0,0,1,0,0,0,0,0,0],
-      [0,0,0,0,0,0,1,0,0,0,0,0,0],
-      [0,0,0,0,0,0,1,0,0,0,0,0,0],
       [0,0,0,0,0,1,1,1,0,0,0,0,0],
       [0,0,0,0,1,1,1,1,1,0,0,0,0],
       [0,0,0,1,1,1,1,1,1,1,0,0,0],
       [0,0,1,2,1,1,1,1,2,1,1,0,0],
       [0,1,1,1,1,1,1,1,1,1,1,1,0],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1],
       [1,1,1,1,1,1,1,1,1,1,1,1,1],
       [1,1,1,1,1,1,1,1,1,1,1,1,1],
       [1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -36,16 +36,14 @@ class Map
       [0,0,0,0,0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0,0,0,0,1],
       [0,0,0,0,0,0,0,0,0,0,0,1,1],
       [0,0,0,0,0,0,0,0,0,0,1,1,1],
-      [0,0,0,0,0,0,0,0,0,1,1,1,1]
+      [0,0,0,0,0,0,0,0,0,1,1,1,1],
+      [0,0,0,0,0,0,0,0,1,1,1,1,1],
+      [0,0,0,0,0,0,0,1,1,1,1,1,1]
     ].freeze,
     start_right:[
-      [0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -57,6 +55,8 @@ class Map
       [1,1,0,0,0,0,0,0,0,0,0,0,0],
       [1,1,1,0,0,0,0,0,0,0,0,0,0],
       [1,1,1,1,0,0,0,0,0,0,0,0,0],
+      [1,1,1,1,1,0,0,0,0,0,0,0,0],
+      [1,1,1,1,1,1,0,0,0,0,0,0,0]
     ].freeze,
     solid:[
       [0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -167,12 +167,13 @@ class Map
   def current_area
     create_required_new_adjacent_tiles
     # Player is in the centre of the map, so halve the dimension to get the centre position. This is integer division, so will round down if we have an odd @map_scale
-    centre_offset = (@map_scale / 2).to_i
+    centre_offset = (@map_scale / 2).to_i + 1
     screen_area = []
-    @map_scale.times do |r|
+    # Current area needs to have one row and column extra on all sides so allow smooth scrolling
+    (@map_scale + 2).times do |r|
       screen_area[r] = []
       row = r + @player.current_row - centre_offset
-      @map_scale.times { |c| screen_area[r][c] = @map_hash["row_#{row}".to_sym]["column_#{c + @player.current_column - centre_offset}".to_sym] }
+      (@map_scale + 2).times { |c| screen_area[r][c] = @map_hash["row_#{row}".to_sym]["column_#{c + @player.current_column - centre_offset}".to_sym] }
     end
     screen_area
   end
