@@ -88,16 +88,12 @@ class MainGame
 
     def handle_game_inputs
       if @wait_counter.negative?
-        @player.move_up_or_down(move_up: inputs.up) if !inputs.up_down.zero? && location_accessible?(x: 0, y: inputs.up ? 1 : -1)
-        @player.move_left_or_right(move_right: inputs.right) if !inputs.left_right.zero? && location_accessible?(x: inputs.right ? 1 : -1, y: 0)
+        @player.move_up_or_down(move_up: inputs.up) if !inputs.up_down.zero? && @map.location_accessible?(x: 0, y: inputs.up ? 1 : -1)
+        @player.move_left_or_right(move_right: inputs.right) if !inputs.left_right.zero? && @map.location_accessible?(x: inputs.right ? 1 : -1, y: 0)
         @wait_counter = @default_wait unless inputs.up_down.zero? && inputs.left_right.zero?
       end
       @show_welcome_screen = true if inputs.keyboard.key_down.escape
       @wait_counter -= 1 unless @wait_counter.negative?
-    end
-
-    def location_accessible?(x:, y:)
-      @map.location_accessible?(x: @player.current_column + x, y: @player.current_row + y)
     end
 
     def draw_status_area
@@ -127,10 +123,10 @@ class MainGame
       start_time = state.tick_count - (@wait_counter.negative? ? 0 : @wait_counter)
       easing = @args.easing.ease(start_time, state.tick_count, @default_wait, :identity) * @map_location_size
       # Only add easing if we're not trying to move into an inaccessible location (otherwise we get a nasty 'bouncing' effect)
-      easing = 1 if inputs.up && @last_easing_direction[:up] && !location_accessible?(x: 0, y: 1)
-      easing = -1 if inputs.down && @last_easing_direction[:down] && !location_accessible?(x: 0, y: -1)
-      easing = -1 if inputs.left && @last_easing_direction[:left] && !location_accessible?(x: -1, y: 0)
-      easing = 1 if inputs.right && @last_easing_direction[:right] && !location_accessible?(x: 1, y: 0)
+      easing = 1 if inputs.up && @last_easing_direction[:up] && !@map.location_accessible?(x: 0, y: 1)
+      easing = -1 if inputs.down && @last_easing_direction[:down] && !@map.location_accessible?(x: 0, y: -1)
+      easing = -1 if inputs.left && @last_easing_direction[:left] && !@map.location_accessible?(x: -1, y: 0)
+      easing = 1 if inputs.right && @last_easing_direction[:right] && !@map.location_accessible?(x: 1, y: 0)
       @last_easing_direction = { up: inputs.up, down: inputs.down, left: inputs.left, right: inputs.right}
       case
       when inputs.up

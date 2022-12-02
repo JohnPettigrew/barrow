@@ -231,7 +231,7 @@ class Map
   end
 
   def location_accessible?(x:, y:)
-    @map_hash["row_#{y}".to_sym]["column_#{x}".to_sym].path?
+    @map_hash["row_#{@player.current_row + y}".to_sym]["column_#{@player.current_column + x}".to_sym].path?
   end
 
   class Location
