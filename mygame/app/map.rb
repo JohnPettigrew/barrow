@@ -173,34 +173,23 @@ class Map
     (@map_scale + 2).times do |r|
       screen_area[r] = []
       row = r + @player.current_row - centre_offset
-      (@map_scale + 2).times { |c| screen_area[r][c] = @map_hash["row_#{row}".to_sym]["column_#{c + @player.current_column - centre_offset}".to_sym] }
+      (@map_scale + 2).times { |c| screen_area[r][c] = map_location(x: c + @player.current_column - centre_offset, y: row) }
     end
     screen_area
   end
 
   def location_accessible?(x:, y:)
-    @map_hash["row_#{@player.current_row + y}".to_sym]["column_#{@player.current_column + x}".to_sym].path?
+    map_location(x: @player.current_column + x, y: @player.current_row + y).path?
   end
 
-  # Modified from http://docs.dragonruby.org.s3-website-us-east-1.amazonaws.com/#----rpg-roguelike---roguelike-line-of-sight---main-rb
-  def update_line_of_sight
-    variations = [-1, 0, 1].product([-1, 0, 1])
-    visible = variations.flat_map { |rise, run| thick_line_of_sight(rise, run)}.uniq
-    visible.each do |point| 
-      # Make point visible
-      @map_hash
-    end
-  end
-
-  def reset_line_of_sight
-    # Hide all cells by default, after the current area has been rendered
-
+  def map_location(x:, y:)
+    @map_hash["row_#{y}".to_sym]["column_#{x}".to_sym]
   end
 
   private
 
   def cell_missing?(x:, y:)
-    @map_hash["row_#{y}".to_sym].nil? || @map_hash["row_#{y}".to_sym]["column_#{x}".to_sym].nil?
+    @map_hash["row_#{y}".to_sym].nil? || map_location(x: x, y: y).nil?
   end
 
   def cell_exists?(x:, y:)
@@ -243,7 +232,7 @@ class Map
   end
 
   def create_tile(definition_selector:, origin_x:, origin_y:)
-    return unless @map_hash["row_#{origin_y}".to_sym].nil? || @map_hash["row_#{origin_y}".to_sym]["column_#{origin_x}".to_sym].nil?
+    return unless @map_hash["row_#{origin_y}".to_sym].nil? || map_location(x: origin_x, y: origin_y).nil?
 
     # The tile is a hash of hashes, and each defines a Location object:
     # {
@@ -256,24 +245,6 @@ class Map
       @map_hash["row_#{row}".to_sym] ||= {}
       MAP_DEFINITIONS[definition_selector].first.size.times { |c| @map_hash["row_#{row}".to_sym]["column_#{c + origin_x}".to_sym] = Location.new(location_value: MAP_DEFINITIONS[definition_selector].reverse[r][c]) }
     end
-  end
-
-  # Modified from http://docs.dragonruby.org.s3-website-us-east-1.amazonaws.com/#----rpg-roguelike---roguelike-line-of-sight---main-rb
-  def line_of_sight(rise:, run:)
-    result = []
-    points_on_line(rise, run).each do |point|
-      if cell_exists?(x: point.x, y: point.y)
-        result << point # add point to result collection
-      else
-        return result # return result collection as it is
-      end
-    end
-    result
-  end
-
-  # Modified from http://docs.dragonruby.org.s3-website-us-east-1.amazonaws.com/#----rpg-roguelike---roguelike-line-of-sight---main-rb
-  def points_on_line(rise:, run:)
-    @map_scale.times.map { |i| [@player.current_column + run * i, @player.current_row + rise * i] }
   end
 
   class Location
@@ -314,6 +285,10 @@ class Map
 
     def visible?
       @visible
+    end
+
+    def invisible?
+      !@visible
     end
 
     def light?

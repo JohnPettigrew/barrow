@@ -110,14 +110,14 @@ class MainGame
       outputs.sprites << @player
       easing_x, easing_y = get_easing_values
       # When scrolling the map, need to subtract 1 from row and column numbers because there's one extra row & column on each side of the returned current_area to allow smooth scrolling
-      @map.current_area.update_line_of_sight.each_with_index do |row, r|
+      @map.current_area.each_with_index do |row, r|
         row.each_with_index do |cell, c|
           horizontal_offset = @status_area_width + @map_location_size * (c - 1) + easing_x
           vertical_offset = @map_location_size * (r - 1) + easing_y
-          outputs.solids << cell.size(size: @map_location_size).set_position(horizontal_offset: horizontal_offset, vertical_offset: vertical_offset) unless cell.nil? 
+          outputs.solids << cell.size(size: @map_location_size).set_position(horizontal_offset: horizontal_offset, vertical_offset: vertical_offset) unless cell.nil? || cell.invisible?
         end
       end
-      @map.current_area.reset_line_of_sight
+      # reset_line_of_sight(map_area: current_area)
     end
 
     def get_easing_values
@@ -141,5 +141,44 @@ class MainGame
       else
         [1, 1]
       end
+    end
+
+    # Modified from http://docs.dragonruby.org.s3-website-us-east-1.amazonaws.com/#----rpg-roguelike---roguelike-line-of-sight---main-rb
+    def update_line_of_sight(map_area:)
+      variations = [-1, 0, 1].product([-1, 0, 1])
+      visible = variations.flat_map { |rise, run| thick_line_of_sight(rise: rise, run: run)}.uniq
+      visible.each { |point| @map.map_location(x: point.x, y: point.y).visible = true }
+    end
+
+    def reset_line_of_sight(map_area:)
+      # Hide all cells by default, after the current area has been rendered
+      map_area.flatten.each { |cell| cell.visible = false }
+    end
+
+    # Modified from http://docs.dragonruby.org.s3-website-us-east-1.amazonaws.com/#----rpg-roguelike---roguelike-line-of-sight---main-rb
+    def thick_line_of_sight(rise:, run:)
+      result = []
+      result.push line_of_sight(start_x: 0, rise: rise, run: run)
+      result.push line_of_sight(start_x: -1, rise: rise, run: run) # one left
+      result.push line_of_sight(start_x: 1, rise: rise, run: run) # one right
+      result
+    end
+
+    # Modified from http://docs.dragonruby.org.s3-website-us-east-1.amazonaws.com/#----rpg-roguelike---roguelike-line-of-sight---main-rb
+    def line_of_sight(start_x:, rise:, run:)
+      result = []
+      points_on_line(start_x: @player.current_column + start_x, rise: rise, run: run).each do |point|
+        if cell_exists?(x: point.x, y: point.y)
+          result << point # add point to result collection
+        else
+          return result # return result collection as it is
+        end
+      end
+      result
+    end
+  
+    # Modified from http://docs.dragonruby.org.s3-website-us-east-1.amazonaws.com/#----rpg-roguelike---roguelike-line-of-sight---main-rb
+    def points_on_line(start_x:, rise:, run:)
+      @map_scale.times.map { |i| [start_x + run * i, @player.current_row + rise * i] }
     end
 end
